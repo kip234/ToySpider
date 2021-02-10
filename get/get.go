@@ -7,6 +7,10 @@ import (
 	"regexp"
 	"strings"
 )
+
+//键：链接 值：名字
+type Links map[string]string
+
 //从URL的连接里匹配信息
 func GetHttpMsg(url string, standard *regexp.Regexp,num int) (msg [][]string,err error) {
 	var contain *http.Response//网页内容
