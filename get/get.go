@@ -12,6 +12,11 @@ import (
 //键：储存目标位置 值：网络地址
 type Links map[string]string
 
+type HomePage struct {//首页
+	Url string//在文本里的表现
+	Title string//标题+".html"
+}
+
 const(
 	//<a  href="/zh-cn/docs/quickstart/" class="....">快速入门</a>
 	RxHtml=`<a.*?href="(.*?)"`
@@ -117,7 +122,7 @@ func GetUrlText(url string) (result string,err error) {
 //获取字符串中的链接
 func GetLink(data string,standard *regexp.Regexp) (result Links) {
 	temp:=standard.FindAllStringSubmatch(data,-1)
-	result=make(map[string]string,len(temp))
+	result=make(Links,len(temp))
 	for _,value:=range temp{
 		_,name:=Spliter(value[1])
 		result[value[1]]=name//连接：文件名
@@ -126,7 +131,7 @@ func GetLink(data string,standard *regexp.Regexp) (result Links) {
 }
 
 //下载JS,IMG,CSS到path下面的子目录
-func OnePage(url,path,name,LinkHead string,over1 chan int)  {
+func OnePageRelative(url,path,name,LinkHead string,over1 chan int)  {
 	text,_:=GetUrlText(url)//获取文本
 
 	//获取CSS
