@@ -1,0 +1,10 @@
+{
+  "Directory": "RE/",
+  "LinkHead": "https://www.runoob.com",
+  "RxImg": "<img.*?src=\"(.*?\\.jpg)",
+  "RxHtml": "<a[\\S\\s]*?href=\"(/regexp[\\S\\s]*?\\.html)\"[\\S\\s]*?>([\\S\\s]*?)<",
+  "RxCss": "<link.*?href=\"(.*?\\.css)",
+  "RxJs": "<script[\\S\\s]*?src=\"(.*?\\.js)",
+  "Goal": "https://www.runoob.com/regexp/regexp-tutorial.html",
+  "Link":"www.runoob.com"
+}

@@ -16,6 +16,7 @@ type Config struct {
 	RxCss string
 	RxJs string
 	Goal string
+	Link string
 }
 
 func (c *Config)Init() (err error) {

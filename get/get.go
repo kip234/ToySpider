@@ -25,7 +25,6 @@ func Spliter(data string) (dire,name string) {
 
 //下载链接的内容至path
 func GetSave(url,path string,over chan int) (err error) {
-
 	var resp *http.Response
 	resp,err=http.Get(url)
 	if err!=nil {
@@ -38,9 +37,9 @@ func GetSave(url,path string,over chan int) (err error) {
 	//准备存文件
 	dire,_:=Spliter(path)
 	//fmt.Println("dire:",dire)
-	err=os.MkdirAll(dire,0777)
+	err=os.MkdirAll(dire,0777)//准备文件夹
 	var file *os.File
-	file,err=os.Create(path)
+	file,err=os.Create(path)//创建文件
 	if err!=nil {
 		over<-0
 		return
@@ -82,7 +81,7 @@ func GetLink(data string,standard *regexp.Regexp) (result Links) {
 	result=make(Links,len(temp))
 	for _,value:=range temp{
 		_,name:=Spliter(value[1])
-		result[value[1]]=name//连接：文件名
+		result[name]=value[1]//文件名:连接
 	}
 	return
 }

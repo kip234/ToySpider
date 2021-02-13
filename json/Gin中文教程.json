@@ -1,0 +1,10 @@
+{
+  "Directory": "Gin/",
+  "LinkHead": "https://gin-gonic.com",
+  "RxImg": "<link.*?href=\"(.*?\\.png)\"",
+  "RxHtml": "<a.*?href=\"(/zh-cn/docs/.*?)\".*?>(.*?)<",
+  "RxCss": "<link.*?href=\"(.*?\\.css)\"",
+  "RxJs": "<script src=\"(.*?\\.js)\"",
+  "Goal": "https://gin-gonic.com/zh-cn/docs/",
+  "Link":"gin-gonic.com"
+}

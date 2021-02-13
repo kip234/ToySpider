@@ -8,7 +8,7 @@
 *.png
 *.jpg
 
-*.exe
+*.log
 
 规律.txt
 !.gitignore
