@@ -1,13 +1,6 @@
 #GOLand
 .*
 
-#网页
-*.html
-*.js
-*.css
-*.png
-*.jpg
-
 *.log
 
 规律.txt

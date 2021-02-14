@@ -109,66 +109,29 @@
     > JSON处理
     >
     > HTTP请求
+    
 * 心态
 	>我的代码可能反人类
 	
 	代码结构：
-
-```mermaid
-graph TD
-/(/)
-/==>1(main.go)==>fun1(func SaveHTML)
-1==>fun2(func OnePageSources)
-1==>fun3(func main)
-/==>2(/log)==>3(log.go)
-3==>fun4(func Log)
-/==>4(/get)==>5(get.go)
-5==>type1(type Links)
-5==>fun5(func Spliter)
-5==>fun6(func GetSave)
-5==>fun7(func GetUrlText)
-5==>fun8(func GetLink)
-/==>6(/config)==>7(base.go)
-7==>typ2(type Config struct)
-7==>fun9(func Init)
-/==>8(/json)==>9(.json)
-```
-
-
-
-
+	
+	<img src="imgs/%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84.PNG" style="zoom:200%;" />
 
 ## 业务逻辑
 
 [目录](##目录)
 
-```mermaid
-graph TD
-1(URL)==>2(获取HTML文本)
-2==>3(统计HTML链接)==>7(提取标题)==>9
-2==>4(统计CSS链接)==>8(提取文件名)
-2==>5(统计IMG链接)==>8
-2==>6(统计JS链接)==>8==>9
-9(将HTML链接改为对应标题,CSS,JS,IMG链接改为文件夹+文件名)
-9==>10(以标题名作为文件名保存HTML文本)
-9==>11(下载相应资源到文件夹)
-```
+业务逻辑
 
-```mermaid
-graph TD
-A(目录结构)
-/(...)
-/==>ROOT(指定文件夹)==>html(.html)
-ROOT==>CSS(/css)==>css(.css)
-ROOT==>JS(/js)==>js(.js)
-ROOT==>IMG(/img)==>img(.jpg/.png)
-```
+![](imgs/%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91.PNG)
 
-```mermaid
-graph LR
-A(工作流程)
-1(下载HTML文本)==>2(提取HTML链接)==>3(统计所有页面的资源)==>4(下载)
-```
+目录结构
+
+![](imgs/%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84.PNG)
+
+工作流程
+
+![](imgs/%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8BPNG.PNG)
 
 ## 吐槽
 
