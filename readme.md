@@ -115,7 +115,23 @@
 	
 	代码结构：
 	
-	![](imgs/1.PNG)
+	```mermaid
+	graph TD
+	/==>/log==>log.go==>fun1(func log)
+	/==>/get==>go1(get.go)==>type1(type Links)
+	go1==>fun2(func Spliter)
+	go1==>fun3(func GetSave)
+	go1==>fun4(func GetUrlText)
+	go1==>fun5(func GetLink)
+	/==>/config==>go2(base.go)==>type2(type Config struct)
+	go2==>fun6(func Init)
+	/==>/json==>.json
+	/==>go3(main.go)==>fun7(func main)
+	go3==>fun8(func SaveHTML)
+	go3==>fun9(func OnePageSources)
+	```
+	
+	
 
 ## 业务逻辑
 
@@ -123,15 +139,41 @@
 
 业务逻辑
 
-![](imgs/4.PNG)
+```mermaid
+graph TD
+url(URL)==>1(获取HTML文本)
+1==>2(统计HTML链接)==>6(提取标题)
+1==>3(统计CSS链接)
+1==>4(统计IMG链接)
+1==>5(统计JS链接)
+3==>7(提取文件名)
+4==>7
+5==>7
+6==>8(将HTML链接改为对应的标题,CSS等资源链接改为文件夹+文件名)
+7==>8
+8==>9(以标题名作为文件名保存HTML文本)
+8==>10(下载资源到对应目录)
+```
 
 目录结构
 
-![](imgs/3.PNG)
+```mermaid
+graph TD
+...==>1(指定文件夹)
+1==>.html
+1==>/css==>.css
+1==>/js==>.js
+1==>/img==>.jpg/.png
+```
 
 工作流程
 
-![](imgs/2.PNG)
+```mermaid
+graph LR
+下载HTML文本==>提取HTML链接==>统计所有页面的资源==>下载
+```
+
+
 
 ## 吐槽
 
