@@ -17,6 +17,7 @@ type Config struct {
 	RxJs string
 	Goal string
 	Link string
+	Debug bool
 }
 
 func (c *Config)Init() (err error) {

@@ -7,10 +7,17 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"./log"
 )
 
 var conf config.Config
+
+var (
+	cssLock sync.Mutex
+	jsLock sync.Mutex
+	imgLock sync.Mutex
+)
 
 //下载文本，链接更换
 func SaveHTML(url,name string,html,css,js,img get.Links,over chan int)  {
@@ -51,7 +58,7 @@ func SaveHTML(url,name string,html,css,js,img get.Links,over chan int)  {
 }
 
 //查找本页面需要的CSS、JS、IMG资源
-func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links)  {
+func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links,over chan int)  {
 	text,err:=get.GetUrlText(url)//获取文本
 
 	if err!=nil {
@@ -64,7 +71,9 @@ func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links)  {
 	css:=get.GetLink(text,cssstd)
 	for data,link:=range css{
 		data=strings.Trim(data," \t\n\r\f")//除去空白字符
+		cssLock.Lock()
 		cssLinks[data]=link
+		cssLock.Unlock()
 	}
 	//获取img
 	//fmt.Println("IMG")
@@ -72,7 +81,9 @@ func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links)  {
 	img:=get.GetLink(text,imgstd)
 	for data,link:=range img{
 		data=strings.Trim(data," \t\n\r\f")//除去空白字符
+		imgLock.Lock()
 		imgLinks[data]=link
+		imgLock.Unlock()
 	}
 
 	//获取js
@@ -81,14 +92,17 @@ func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links)  {
 	js:=get.GetLink(text,jsstd)
 	for data,link:=range js{
 		data=strings.Trim(data," \t\n\r\f")//除去空白字符
+		jsLock.Lock()
 		jsLinks[data]=link
+		jsLock.Unlock()
 	}
+	over<-1
 }
 
 func main() {
 
-	err:=log.Log()
-	if err!=nil {
+	err := log.Log()
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -112,7 +126,21 @@ func main() {
 		//除去空白字符
 		data[2]=strings.Trim(data[2]," \t\n\r\f")
 		htmlLink[data[2]+".html"]=data[1]
-		OnePageSources(conf.LinkHead+data[1],cssLink,imgLink,jsLink)
+
+		a:=strings.Index(data[1],"http://")//有没有协议
+		a+=strings.Index(data[1],"https://")//找不到返回-1
+		if a>= -1{//有其中一个-啥也不缺
+			go OnePageSources(data[1],cssLink,imgLink,jsLink,over)
+		}else if a=strings.Index(data[1],".com");a>=0{//只缺协议
+			data[1]=strings.Trim(data[1],"/")//除去多余的 //
+			go OnePageSources("https://"+data[1],cssLink,imgLink,jsLink,over)
+		}else {//都缺
+			go OnePageSources(conf.LinkHead+data[1],cssLink,imgLink,jsLink,over)
+		}
+	}
+
+	for i:=0;i<len(links);i++ {
+		<-over
 	}
 
 	//反馈
@@ -131,6 +159,10 @@ func main() {
 
 	num:=len(cssLink)+len(jsLink)+len(imgLink)+len(htmlLink)//统计链接总数
 	fmt.Println("共",num,"个链接")
+
+	if conf.Debug {//如果调试就不下载
+		return
+	}
 
 	//保存HTML文本
 	for a2,a1:=range htmlLink{

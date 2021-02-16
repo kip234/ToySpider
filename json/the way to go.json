@@ -1,0 +1,11 @@
+{
+  "Directory": "the-way-to-go/",
+  "LinkHead": "https://learnku.com",
+  "RxImg": "<img.*?href=\"(.*?\\.png)\"",
+  "RxHtml": "<a.*?href=\"(https://learnku.com/docs/the-way-to-go/.*?)\".*?>([^<>]*?)<",
+  "RxCss": "<link.*?href=\"(.*?\\.css)\"",
+  "RxJs": "<script src=\"(.*?\\.js)\"",
+  "Goal": "https://learnku.com/docs/the-way-to-go",
+  "Link":"learnku.com",
+  "Debug":false
+}

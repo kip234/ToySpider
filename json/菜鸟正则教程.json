@@ -7,4 +7,5 @@
   "RxJs": "<script[\\S\\s]*?src=\"(.*?\\.js)",
   "Goal": "https://www.runoob.com/regexp/regexp-tutorial.html",
   "Link":"www.runoob.com"
+  "Debug":false
 }
