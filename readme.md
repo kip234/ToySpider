@@ -75,7 +75,7 @@
   "RxCss": "<link.*?href=\"(.*?\\.css)\"",
   "RxJs": "<script src=\"(.*?\\.js)\"",
   "Goal": "https://gin-gonic.com/zh-cn/docs/",
-  "Link":"gin-gonic.com"
+  "Link":"gin-gonic.com",
    "Debug":false
 }
 ```
