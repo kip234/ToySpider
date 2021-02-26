@@ -7,5 +7,6 @@
   "RxJs": "<script src=\"(.*?\\.js)\"",
   "Goal": "https://learnku.com/docs/the-way-to-go",
   "Link":"learnku.com",
-  "Debug":false
+  "Debug":false,
+  "RoutingGroup":""
 }

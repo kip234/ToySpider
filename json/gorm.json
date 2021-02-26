@@ -1,0 +1,12 @@
+{
+  "Directory": "Gorm/",
+  "LinkHead": "https://gorm.io",
+  "RxImg": "<link.*?href=\"(.*?\\.png)\"",
+  "RxHtml": "<a.*?href=\"([a-zA-Z]*?.html)\".*?>(.*?)<",
+  "RxCss": "<link.*?href=\"(.*?\\.css)\"",
+  "RxJs": "<script src=\"(.*?\\.js)\"",  
+  "Goal": "https://gorm.io/zh_CN/docs/index.html",
+  "Link":"gorm.io",
+  "Debug":true,
+  "RoutingGroup":"/zh_CN/docs/"
+}

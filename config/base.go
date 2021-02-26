@@ -18,6 +18,7 @@ type Config struct {
 	Goal string
 	Link string
 	Debug bool
+	RoutingGroup string
 }
 
 func (c *Config)Init() (err error) {

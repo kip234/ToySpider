@@ -109,6 +109,10 @@ func main() {
 
 	conf.Init()//初始化配置
 
+	if conf.Debug {
+		fmt.Println(conf)
+	}
+
 	cssLink:=make(get.Links)//记录所有页面的CSS资源链接
 	imgLink:=make(get.Links)//记录所有页面的img资源链接
 	jsLink:=make(get.Links)//记录所有页面的js资源链接
@@ -118,6 +122,8 @@ func main() {
 	text,_:=get.GetUrlText(conf.Goal)//获取文本
 	htmlstd:=regexp.MustCompile(conf.RxHtml)//匹配HTML的正则对象
 	links:=htmlstd.FindAllStringSubmatch(text,-1)//匹配HTML链接
+
+	fmt.Println(links)
 
 	for _,data:=range links{//收集资源
 		for _,illegal:=range "\\/:*?\"<>|"{//替换作为文件名时的非法字符
@@ -135,7 +141,7 @@ func main() {
 			data[1]=strings.Trim(data[1],"/")//除去多余的 //
 			go OnePageSources("https://"+data[1],cssLink,imgLink,jsLink,over)
 		}else {//都缺
-			go OnePageSources(conf.LinkHead+data[1],cssLink,imgLink,jsLink,over)
+			go OnePageSources(conf.LinkHead+conf.RoutingGroup+data[1],cssLink,imgLink,jsLink,over)
 		}
 	}
 
@@ -160,9 +166,9 @@ func main() {
 	num:=len(cssLink)+len(jsLink)+len(imgLink)+len(htmlLink)//统计链接总数
 	fmt.Println("共",num,"个链接")
 
-	if conf.Debug {//如果调试就不下载
-		return
-	}
+	//if conf.Debug {//如果调试就不下载
+	//	return
+	//}
 
 	//保存HTML文本
 	for a2,a1:=range htmlLink{
@@ -170,11 +176,20 @@ func main() {
 		a+=strings.Index(a1,"https://")//找不到返回-1
 		if a>= -1{//有其中一个-啥也不缺
 			go SaveHTML(a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			if conf.Debug {
+				fmt.Println("get",a1)
+			}
 		}else if a=strings.Index(a1,".com");a>=0{//只缺协议
 			a1=strings.Trim(a1,"/")//除去多余的 //
 			go SaveHTML("https://"+a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			if conf.Debug {
+				fmt.Println("get","https://"+a1)
+			}
 		}else {//都缺
-			go SaveHTML(conf.LinkHead+a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			go SaveHTML(conf.LinkHead+conf.RoutingGroup+a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			if conf.Debug {
+				fmt.Println("get",conf.LinkHead+conf.RoutingGroup+a1)
+			}
 		}
 	}
 
@@ -184,11 +199,20 @@ func main() {
 		a+=strings.Index(a1,"https://")//有没有
 		if a>= -1{
 			go get.GetSave(a1,conf.Directory+"css/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",a1)
+			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
 			go get.GetSave("https://"+a1,conf.Directory+"css/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get","https://"+a1)
+			}
 		}else{
 			go get.GetSave(conf.LinkHead+a1,conf.Directory+"css/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",conf.LinkHead+a1)
+			}
 		}
 	}
 	for a2,a1:=range jsLink{
@@ -196,11 +220,20 @@ func main() {
 		a+=strings.Index(a1,"https://")
 		if a>= -1{
 			go get.GetSave(a1,conf.Directory+"js/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",a1)
+			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
 			go get.GetSave("https://"+a1,conf.Directory+"js/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get","https://"+a1)
+			}
 		}else{
 			go get.GetSave(conf.LinkHead+a1,conf.Directory+"js/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",conf.LinkHead+a1)
+			}
 		}
 	}
 	for a2,a1:=range imgLink{
@@ -208,11 +241,20 @@ func main() {
 		a+=strings.Index(a1,"https://")//找不到返回-1
 		if a>= -1{
 			go get.GetSave(a1,conf.Directory+"img/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",a1)
+			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
 			go get.GetSave("https://"+a1,conf.Directory+"img/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get","https://"+a1)
+			}
 		}else{
 			go get.GetSave(conf.LinkHead+a1,conf.Directory+"img/"+a2,over)
+			if conf.Debug {
+				fmt.Println("get",conf.LinkHead+a1)
+			}
 		}
 	}
 
