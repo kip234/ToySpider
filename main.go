@@ -19,8 +19,12 @@ var (
 	imgLock sync.Mutex
 )
 
+var WG sync.WaitGroup
+
 //下载文本，链接更换
-func SaveHTML(url,name string,html,css,js,img get.Links,over chan int)  {
+func SaveHTML(url,name string,html,css,js,img get.Links)  {
+	WG.Add(1)
+	defer WG.Done()
 	text,err1:=get.GetUrlText(url)//获取文本
 	if err1!=nil {
 		fmt.Println("!Error",url,":",err1)
@@ -48,17 +52,17 @@ func SaveHTML(url,name string,html,css,js,img get.Links,over chan int)  {
 	file,err1=os.Create(conf.Directory+name)
 	if err1!=nil {
 		fmt.Println("!Error",url,":",err1)
-		over<-0
 		return
 	}
 	defer file.Close()
 	file.Write([]byte(text))
-	over<-1
 	return
 }
 
 //查找本页面需要的CSS、JS、IMG资源
-func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links,over chan int)  {
+func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links)  {
+	WG.Add(1)
+	defer WG.Done()
 	text,err:=get.GetUrlText(url)//获取文本
 
 	if err!=nil {
@@ -96,7 +100,6 @@ func OnePageSources(url string,cssLinks,imgLinks,jsLinks get.Links,over chan int
 		jsLinks[data]=link
 		jsLock.Unlock()
 	}
-	over<-1
 }
 
 func main() {
@@ -118,7 +121,6 @@ func main() {
 	jsLink:=make(get.Links)//记录所有页面的js资源链接
 	htmlLink:=make(get.Links)//记录所有页面的链接
 
-	over:=make(chan int)//并发信道
 	text,_:=get.GetUrlText(conf.Goal)//获取文本
 	htmlstd:=regexp.MustCompile(conf.RxHtml)//匹配HTML的正则对象
 	links:=htmlstd.FindAllStringSubmatch(text,-1)//匹配HTML链接
@@ -136,57 +138,57 @@ func main() {
 		a:=strings.Index(data[1],"http://")//有没有协议
 		a+=strings.Index(data[1],"https://")//找不到返回-1
 		if a>= -1{//有其中一个-啥也不缺
-			go OnePageSources(data[1],cssLink,imgLink,jsLink,over)
+			go OnePageSources(data[1],cssLink,imgLink,jsLink)
 		}else if a=strings.Index(data[1],".com");a>=0{//只缺协议
 			data[1]=strings.Trim(data[1],"/")//除去多余的 //
-			go OnePageSources("https://"+data[1],cssLink,imgLink,jsLink,over)
+			go OnePageSources("https://"+data[1],cssLink,imgLink,jsLink)
 		}else {//都缺
-			go OnePageSources(conf.LinkHead+conf.RoutingGroup+data[1],cssLink,imgLink,jsLink,over)
+			go OnePageSources(conf.LinkHead+conf.RoutingGroup+data[1],cssLink,imgLink,jsLink)
 		}
 	}
 
-	for i:=0;i<len(links);i++ {
-		<-over
-	}
+	WG.Wait()
 
 	//反馈
-	for value,link:=range htmlLink{
-		fmt.Println(link,"=>",value)
-	}
-	for value,link:=range cssLink{
-		fmt.Println(link,"=>",value)
-	}
-	for value,link:=range jsLink{
-		fmt.Println(link,"=>",value)
-	}
-	for value,link:=range imgLink{
-		fmt.Println(link,"=>",value)
-	}
+	{
+		for value, link := range htmlLink {
+			fmt.Println(link, "=>", value)
+		}
+		for value, link := range cssLink {
+			fmt.Println(link, "=>", value)
+		}
+		for value, link := range jsLink {
+			fmt.Println(link, "=>", value)
+		}
+		for value, link := range imgLink {
+			fmt.Println(link, "=>", value)
+		}
 
-	num:=len(cssLink)+len(jsLink)+len(imgLink)+len(htmlLink)//统计链接总数
-	fmt.Println("共",num,"个链接")
+		num := len(cssLink) + len(jsLink) + len(imgLink) + len(htmlLink) //统计链接总数
+		fmt.Println("共", num, "个链接")
 
-	//if conf.Debug {//如果调试就不下载
-	//	return
-	//}
+		if conf.Debug { //如果调试就不下载
+			return
+		}
+	}
 
 	//保存HTML文本
 	for a2,a1:=range htmlLink{
 		a:=strings.Index(a1,"http://")//有没有协议
 		a+=strings.Index(a1,"https://")//找不到返回-1
 		if a>= -1{//有其中一个-啥也不缺
-			go SaveHTML(a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			go SaveHTML(a1,a2,htmlLink,cssLink,jsLink,imgLink)
 			if conf.Debug {
 				fmt.Println("get",a1)
 			}
 		}else if a=strings.Index(a1,".com");a>=0{//只缺协议
 			a1=strings.Trim(a1,"/")//除去多余的 //
-			go SaveHTML("https://"+a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			go SaveHTML("https://"+a1,a2,htmlLink,cssLink,jsLink,imgLink)
 			if conf.Debug {
 				fmt.Println("get","https://"+a1)
 			}
 		}else {//都缺
-			go SaveHTML(conf.LinkHead+conf.RoutingGroup+a1,a2,htmlLink,cssLink,jsLink,imgLink,over)
+			go SaveHTML(conf.LinkHead+conf.RoutingGroup+a1,a2,htmlLink,cssLink,jsLink,imgLink)
 			if conf.Debug {
 				fmt.Println("get",conf.LinkHead+conf.RoutingGroup+a1)
 			}
@@ -198,18 +200,18 @@ func main() {
 		a:=strings.Index(a1,"http://")//有没有
 		a+=strings.Index(a1,"https://")//有没有
 		if a>= -1{
-			go get.GetSave(a1,conf.Directory+"css/"+a2,over)
+			go get.GetSave(a1,conf.Directory+"css/"+a2)
 			if conf.Debug {
 				fmt.Println("get",a1)
 			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
-			go get.GetSave("https://"+a1,conf.Directory+"css/"+a2,over)
+			go get.GetSave("https://"+a1,conf.Directory+"css/"+a2)
 			if conf.Debug {
 				fmt.Println("get","https://"+a1)
 			}
 		}else{
-			go get.GetSave(conf.LinkHead+a1,conf.Directory+"css/"+a2,over)
+			go get.GetSave(conf.LinkHead+a1,conf.Directory+"css/"+a2)
 			if conf.Debug {
 				fmt.Println("get",conf.LinkHead+a1)
 			}
@@ -219,18 +221,18 @@ func main() {
 		a:=strings.Index(a1,"http://")
 		a+=strings.Index(a1,"https://")
 		if a>= -1{
-			go get.GetSave(a1,conf.Directory+"js/"+a2,over)
+			go get.GetSave(a1,conf.Directory+"js/"+a2)
 			if conf.Debug {
 				fmt.Println("get",a1)
 			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
-			go get.GetSave("https://"+a1,conf.Directory+"js/"+a2,over)
+			go get.GetSave("https://"+a1,conf.Directory+"js/"+a2)
 			if conf.Debug {
 				fmt.Println("get","https://"+a1)
 			}
 		}else{
-			go get.GetSave(conf.LinkHead+a1,conf.Directory+"js/"+a2,over)
+			go get.GetSave(conf.LinkHead+a1,conf.Directory+"js/"+a2)
 			if conf.Debug {
 				fmt.Println("get",conf.LinkHead+a1)
 			}
@@ -240,27 +242,23 @@ func main() {
 		a:=strings.Index(a1,"http://")//判断有没有网址
 		a+=strings.Index(a1,"https://")//找不到返回-1
 		if a>= -1{
-			go get.GetSave(a1,conf.Directory+"img/"+a2,over)
+			go get.GetSave(a1,conf.Directory+"img/"+a2)
 			if conf.Debug {
 				fmt.Println("get",a1)
 			}
 		}else if a=strings.Index(a1,".com");a>=0{
 			a1=strings.Trim(a1,"/")//除去多余的 //
-			go get.GetSave("https://"+a1,conf.Directory+"img/"+a2,over)
+			go get.GetSave("https://"+a1,conf.Directory+"img/"+a2)
 			if conf.Debug {
 				fmt.Println("get","https://"+a1)
 			}
 		}else{
-			go get.GetSave(conf.LinkHead+a1,conf.Directory+"img/"+a2,over)
+			go get.GetSave(conf.LinkHead+a1,conf.Directory+"img/"+a2)
 			if conf.Debug {
 				fmt.Println("get",conf.LinkHead+a1)
 			}
 		}
 	}
-
-
-	for i:=1;i<=num;i++{//等待协程退出
-		<-over
-		fmt.Println("已完成",i,":",num,"")
-	}
+	WG.Wait()
+	get.WG.Wait()
 }

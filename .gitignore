@@ -3,5 +3,11 @@
 
 *.log
 
+*.html
+*.css
+*.js
+*.png
+*.jpg
+
 规律.txt
 !.gitignore

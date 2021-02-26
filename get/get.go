@@ -7,10 +7,13 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 //键：储存目标位置 值：网络地址
 type Links map[string]string
+
+var WG sync.WaitGroup
 
 //将网址拆分为目录+文件名
 func Spliter(data string) (dire,name string) {
@@ -24,12 +27,13 @@ func Spliter(data string) (dire,name string) {
 }
 
 //下载链接的内容至path
-func GetSave(url,path string,over chan int) (err error) {
+func GetSave(url,path string) (err error) {
+	WG.Add(1)
+	defer WG.Done()
 	var resp *http.Response
 	resp,err=http.Get(url)
 	if err!=nil {
 		fmt.Println("GetSave:",url,"err =",err)
-		over<-0
 		return
 	}
 
@@ -41,7 +45,6 @@ func GetSave(url,path string,over chan int) (err error) {
 	var file *os.File
 	file,err=os.Create(path)//创建文件
 	if err!=nil {
-		over<-0
 		return
 	}
 	defer file.Close()
@@ -55,7 +58,6 @@ func GetSave(url,path string,over chan int) (err error) {
 		file.Write(buf[:n])
 		n,err=resp.Body.Read(buf)
 	}
-	over<-1
 	return
 }
 
